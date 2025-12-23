@@ -1,2 +1,3 @@
-# Scorpian
-This is a Micro Moues project done by robotics society of university of peradeniya
+idf.py add-dependency "espp/vl53l^1.0.33"
+
+idf.py reconfigure

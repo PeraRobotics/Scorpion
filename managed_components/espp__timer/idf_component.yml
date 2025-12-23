@@ -1,0 +1,20 @@
+dependencies:
+  espp/task: '>=1.0'
+  idf:
+    version: '>=5.0'
+description: C++ Timers for ESP-IDF which can be started / stopped / resumed.
+documentation: https://esp-cpp.github.io/espp/timer.hml
+license: MIT
+maintainers:
+- William Emfinger <waemfinger@gmail.com>
+repository: git://github.com/esp-cpp/espp.git
+repository_info:
+  commit_sha: 35428fbc3d604554f52d16d8bac712a244e65c59
+  path: components/timer
+tags:
+- cpp
+- Component
+- Timer
+- Thread
+url: https://github.com/esp-cpp/espp/tree/main/components/timer
+version: 1.0.33
