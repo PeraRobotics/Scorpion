@@ -19,3 +19,11 @@ The repository is organized to follow the standard ESP-IDF build system:
 ---
 
 ## Setup & Installation
+
+
+Method,Type,Primary Benefit
+Touch,Input,Replaces physical buttons with touch-sensitive pads.
+RMT,Out/In,Precise timing for LEDs and Infrared.
+PCNT,Input,High-speed pulse counting without CPU load.
+I2S,Out/In,Dedicated to high-quality digital audio.
+Hall,Input,Detects magnets using the chip's internal circuitry.

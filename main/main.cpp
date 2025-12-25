@@ -5,7 +5,7 @@
 
 extern "C" {
     #include "driver/i2c.h"
-    #include "vl53l0x.h"
+    #include "sens_vl53l0x.h"
 }
 // Your configuration
 #define I2C_PORT        I2C_NUM_0
