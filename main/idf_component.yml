@@ -6,4 +6,4 @@ dependencies:
   espp/i2c: '*'
   espp/logger: '*'
   espp/timer: '*'
-  espp/vl53l: ^1.0.17
+
