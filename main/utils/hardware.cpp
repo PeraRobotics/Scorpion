@@ -3,6 +3,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <math.h>
+#include <stdio.h>
 #include <algorithm>
 static const char *H_TAG = "HARDWARE";
 
@@ -13,6 +14,11 @@ static mcpwm_cmpr_handle_t m1_cmprA = NULL, m1_cmprB = NULL;
 static mcpwm_cmpr_handle_t m2_cmprA = NULL, m2_cmprB = NULL;
 static mcpwm_gen_handle_t m1_genA = NULL, m1_genB = NULL;
 static mcpwm_gen_handle_t m2_genA = NULL, m2_genB = NULL;
+
+static pcnt_unit_handle_t m1_pcnt_unit = NULL, m2_pcnt_unit = NULL;
+static pcnt_channel_handle_t m1_chan_A = NULL, m1_chan_B = NULL;
+static pcnt_channel_handle_t m2_chan_A = NULL, m2_chan_B = NULL;
+
 
 void flash_leds() {
     gpio_set_level(LED_1, 1); gpio_set_level(LED_2, 1); 
@@ -44,10 +50,38 @@ void set_motor_speeds(float m1_speed, float m2_speed) {
     mcpwm_comparator_set_compare_value(m2_cmprB, (m2_speed <  0.0f) ? (uint32_t)m2_t : 0);
 }
 
+std::pair<int, int> get_encoder_count(){
+    int count1 = 0;
+    int count2 = 0;
+    pcnt_unit_get_count(m1_pcnt_unit, &count1);
+    pcnt_unit_get_count(m2_pcnt_unit, &count2);
+    return std::make_pair(count1, count2);
+
+    // USAGE
+        // int M1_last_count = 0;
+        // double total_distance = 0.0;
+        // TickType_t last_tick = xTaskGetTickCount();
+
+        // while (1) {
+        //     auto [M1_count, M2_count]= get_encoder_count();
+        //     TickType_t cur_tick = xTaskGetTickCount();
+        //     double dt = (double)(cur_tick - last_tick) / configTICK_RATE_HZ;
+        //     int delta_pulses = M1_count - M1_last_count;
+        //     double revs = (double)delta_pulses / (PULSES_PER_REV * DECODING_FACTOR);
+        //     double velocity = (revs * WHEEL_CIRCUMFERENCE) / dt;
+        //     total_distance += (revs * WHEEL_CIRCUMFERENCE);
+        //     ESP_LOGI(TAG, "Pulses: %d | Speed: %.2f m/s | Pos: %.2f m", M1_count, velocity, total_distance);
+        //     M1_last_count = M1_count;
+        //     last_tick = cur_tick;
+        // }
+}
 void init_hardware() {
     // GPIO Init
     gpio_config(&out_conf);
     gpio_config(&in_conf);
+    gpio_config(&enc_conf);  // Initialize GPIOs for encoder inputs using
+
+    ESP_LOGI(H_TAG, "GPIO Initialized.");
 
     // MCPWM Init
     mcpwm_new_timer(&timer_config, &motor_timer);
@@ -83,6 +117,42 @@ void init_hardware() {
     mcpwm_timer_start_stop(motor_timer, MCPWM_TIMER_START_NO_STOP);
     
     set_motor_speeds(0, 0);
+
+    ESP_LOGI(H_TAG, "MCPWM Initialized.");
+
+    // PCNT Init
+    pcnt_new_unit(&pcnt_unit_config, &m1_pcnt_unit);
+    pcnt_new_unit(&pcnt_unit_config, &m2_pcnt_unit);
+
+    pcnt_unit_set_glitch_filter(m1_pcnt_unit, &filter_config);
+    pcnt_unit_set_glitch_filter(m2_pcnt_unit, &filter_config);
+
+    pcnt_new_channel(m1_pcnt_unit, &m1_chan_A_config, &m1_chan_A);
+    pcnt_new_channel(m1_pcnt_unit, &m1_chan_B_config, &m1_chan_B);
+    pcnt_new_channel(m2_pcnt_unit, &m2_chan_A_config, &m2_chan_A);
+    pcnt_new_channel(m2_pcnt_unit, &m2_chan_B_config, &m2_chan_B);
+
+    pcnt_channel_set_edge_action(m1_chan_A, PCNT_CHANNEL_EDGE_ACTION_DECREASE, PCNT_CHANNEL_EDGE_ACTION_INCREASE);
+    pcnt_channel_set_level_action(m1_chan_A, PCNT_CHANNEL_LEVEL_ACTION_KEEP, PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
+    pcnt_channel_set_edge_action(m1_chan_B, PCNT_CHANNEL_EDGE_ACTION_INCREASE, PCNT_CHANNEL_EDGE_ACTION_DECREASE);
+    pcnt_channel_set_level_action(m1_chan_B, PCNT_CHANNEL_LEVEL_ACTION_KEEP, PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
+    pcnt_channel_set_edge_action(m2_chan_A, PCNT_CHANNEL_EDGE_ACTION_DECREASE, PCNT_CHANNEL_EDGE_ACTION_INCREASE);
+    pcnt_channel_set_level_action(m2_chan_A, PCNT_CHANNEL_LEVEL_ACTION_KEEP, PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
+    pcnt_channel_set_edge_action(m2_chan_B, PCNT_CHANNEL_EDGE_ACTION_INCREASE, PCNT_CHANNEL_EDGE_ACTION_DECREASE);
+    pcnt_channel_set_level_action(m2_chan_B, PCNT_CHANNEL_LEVEL_ACTION_KEEP, PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
+
+    pcnt_unit_enable(m1_pcnt_unit);
+    pcnt_unit_enable(m2_pcnt_unit);
+
+    pcnt_unit_clear_count(m1_pcnt_unit);
+    pcnt_unit_clear_count(m2_pcnt_unit);
+
+    pcnt_unit_start(m1_pcnt_unit);
+    pcnt_unit_start(m2_pcnt_unit);
+
+    ESP_LOGI(H_TAG, "PCNT Initialized.");
+
+
     flash_leds();
-    ESP_LOGI(H_TAG, "Hardware Initialized.");
+    ESP_LOGI(H_TAG, "System Online.");
 }
