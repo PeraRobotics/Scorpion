@@ -6,33 +6,23 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
-// 1. Pin Definitions
-#define LED1 GPIO_NUM_2 
-#define LED2 GPIO_NUM_18 
-#define LED3 GPIO_NUM_23
-#define LED4 GPIO_NUM_19
-
-#define BTN1 GPIO_NUM_32 
-#define BTN2 GPIO_NUM_33 
-
-#define INPUT_MASK  ((1ULL << BTN1) | (1ULL << BTN2))
-#define OUTPUT_MASK ((1ULL << LED1) | (1ULL << LED2) | (1ULL << LED3) | (1ULL << LED4))
+#include "config.h"
 
 
 static const char *H_TAG = "HARDWARE";
 
 inline void flash_leds() {
-    gpio_set_level(LED1, 1); gpio_set_level(LED2, 1); 
-    gpio_set_level(LED3, 1); gpio_set_level(LED4, 1);
+    gpio_set_level(LED_1, 1); gpio_set_level(LED_2, 1); 
+    gpio_set_level(LED_3, 1); gpio_set_level(LED_4, 1);
     vTaskDelay(pdMS_TO_TICKS(500));
-    gpio_set_level(LED1, 0); gpio_set_level(LED2, 0); 
-    gpio_set_level(LED3, 0); gpio_set_level(LED4, 0);
+    gpio_set_level(LED_1, 0); gpio_set_level(LED_2, 0); 
+    gpio_set_level(LED_3, 0); gpio_set_level(LED_4, 0);
 }
 
 inline void init_hardware() {
-    gpio_reset_pin(LED1); gpio_reset_pin(LED2);
-    gpio_reset_pin(LED3); gpio_reset_pin(LED4);   
-    gpio_reset_pin(BTN1); gpio_reset_pin(BTN2);
+    gpio_reset_pin(LED_1); gpio_reset_pin(LED_2);
+    gpio_reset_pin(LED_3); gpio_reset_pin(LED_4);   
+    gpio_reset_pin(BTN_1); gpio_reset_pin(BTN_2);
 
     gpio_config_t out_conf = {};
     out_conf.pin_bit_mask = OUTPUT_MASK;
