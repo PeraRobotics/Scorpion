@@ -1,6 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "driver/gpio.h"
+#include "driver/mcpwm_prelude.h"
+
 // LED Pin Definitions
 #define LED_1 GPIO_NUM_2 
 #define LED_2 GPIO_NUM_18 
@@ -16,6 +19,7 @@
 #define OUTPUT_MASK ((1ULL << LED_1) | (1ULL << LED_2) | (1ULL << LED_3) | (1ULL << LED_4))
 
 // Motor Pin Definitions
+
 // MCPWM Definition
 //  └── Timer 0
 //       ├── Operator 0 (Motor 1)
@@ -35,8 +39,17 @@
 #define MOTOR_TIMER_GROUP_ID 0
 #define MOTOR_TIMER_RESOLUTION_HZ 1000000
 #define MOTOR_TIMER_PERIOD_TICKS 20000
-
 #define MOTOR_OPERATOR_ID 0
 
+// Extern declarations for structures defined in config.c
+extern const mcpwm_timer_config_t timer_config;
+extern const mcpwm_operator_config_t motor_operator_config;
+extern const mcpwm_comparator_config_t cmpr_config;
+extern const mcpwm_generator_config_t motor_1_gen_A_config;
+extern const mcpwm_generator_config_t motor_1_gen_B_config;
+extern const mcpwm_generator_config_t motor_2_gen_A_config;
+extern const mcpwm_generator_config_t motor_2_gen_B_config;
+extern const gpio_config_t out_conf;
+extern const gpio_config_t in_conf;
 
 #endif
